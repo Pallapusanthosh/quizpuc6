@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {  setLoading } from '../store/authslice';
-
+import { setLoading } from '../store/authslice';
+import Home from '../pages/Home';
 import { useDispatch, useSelector } from 'react-redux';
 
 const LoginForm = () => {
   const [teckziteId, setTeckziteId] = useState('');
   const [quizpassword, setQuizPassword] = useState('');
+  const [showquiz, setShowQuiz] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -19,11 +20,11 @@ const LoginForm = () => {
       dispatch(setLoading(true));
       navigate('/');
     }
-  }, [quizid, navigate]);
+  }, [quizid, navigate, dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await fetch(`http://localhost:4001/user/login?quizid=${quizid}`, {
         method: 'POST',
@@ -38,19 +39,20 @@ const LoginForm = () => {
         localStorage.setItem('Teckziteid', teckziteId);
         localStorage.setItem('quizId', data.quizid);
         localStorage.setItem('logintoken', data.logintoken);
-        navigate('/home');
+        setShowQuiz(true);
       } else {
         throw new Error('Wrong credentials. Please try again.');
       }
     } catch (error) {
       alert(error.message);
-    }
-    finally{
+    } finally {
       dispatch(setLoading(false));
     }
   };
 
-  return (
+  return showquiz ? (
+    <Home />
+  ) : (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Quiz Login</h2>

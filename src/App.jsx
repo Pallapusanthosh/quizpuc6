@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import AttemptQuiz from './components/QuizAttempt';
 import Loadingbar from './components/Loadingbar';
 
+import ThankYou from './pages/Thanks';
+
 const RequireQuizId = ({ children }) => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -23,7 +25,7 @@ function App() {
       <Router>
         <Routes>
           <Route
-            path="/"
+            path="/user/attempt"
             element={
               <RequireQuizId>
                 <LoginForm />
@@ -33,7 +35,8 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="*" element={<Navigate to="/" replace />} />
           <Route path="/AttemptQuiz" element={<AttemptQuiz />} />
-        </Routes>
+          <Route path="/thankyou" element={<ThankYou/>}/>
+         </Routes>
       </Router>
     </>
   );
