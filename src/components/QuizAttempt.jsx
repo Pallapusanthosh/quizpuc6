@@ -42,7 +42,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
           clearInterval(timer); // Stop the timer immediately
           if (!isSubmitted) {
             setIsSubmitted(true); // Mark as submitted first
-            handleSubmit(); // Then submit
+            handleSubmit(false); // Then submit
           }
           return 0;
         }
@@ -73,11 +73,11 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
     });
   };
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (show) => {
     if (isSubmitting || isSubmitted) return; // Prevent multiple submissions
     setIsSubmitting(true);
-  
-    if (isSubmitted || window.confirm('Are you sure you want to submit the quiz?')) {
+    const windowshow = show ? window.confirm('Are you sure you want to submit the quiz?') : true; 
+    if (isSubmitted || windowshow) {
       try {
         const response = await axios.post(
           'http://localhost:4001/user/submit-quiz',
@@ -266,7 +266,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
           {/* Fixed Submit Button */}
           <div className="fixed bottom-6 right-6 bg-white p-4 rounded-xl shadow-lg border border-gray-500">
             <button
-              onClick={handleSubmit}
+              onClick={()=>handleSubmit(true)}
               className={`px-8 py-3 rounded-xl text-lg font-bold transition-transform
                 ${
                   'bg-green-600 hover:bg-green-700 text-white shadow-md hover:scale-105'
