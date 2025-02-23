@@ -53,33 +53,33 @@ const LoginForm = () => {
   return showquiz ? (
     <Home />
   ) : (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Quiz Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="bg-gray-900 p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-700">
+        <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Quiz Login</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Teckzite ID</label>
+            <label className="block text-sm font-medium text-cyan-300 mb-2">Teckzite ID</label>
             <input
               type="text"
               value={teckziteId}
               onChange={(e) => setTeckziteId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Quiz Password</label>
+            <label className="block text-sm font-medium text-cyan-300 mb-2">Quiz Password</label>
             <input
               type="password"
               value={quizpassword}
               onChange={(e) => setQuizPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
               required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-200"
+            className="w-full bg-cyan-500 text-gray-900 py-2 px-4 rounded-lg hover:bg-cyan-400 transition duration-200 font-semibold"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
