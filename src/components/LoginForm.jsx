@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { setLoading } from '../store/authslice';
 import Home from '../pages/Home';
 import { useDispatch, useSelector } from 'react-redux';
+import { Api_URL } from '../utils/Api_url';
 
 const LoginForm = () => {
   const [teckziteId, setTeckziteId] = useState('');
@@ -26,7 +27,7 @@ const LoginForm = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`http://localhost:4001/user/login?quizid=${quizid}`, {
+      const response = await fetch(`${Api_URL}/user/login?quizid=${quizid}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,7 +50,6 @@ const LoginForm = () => {
       dispatch(setLoading(false));
     }
   };
-
   return showquiz ? (
     <Home />
   ) : (

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setLoading } from "../store/authslice";
+import { Api_URL } from "../utils/Api_url";
 
 const AttemptQuiz = ({ quiz, teckziteId }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -10,10 +11,12 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   const [visitedQuestions, setVisitedQuestions] = useState(new Set());
   const questionRefs = useRef([]);
   const defaultTime = 10 * 60; // Default to 10 minutes in seconds
-  const quizTime = quiz.quizTime ? parseInt(quiz.quizTime) * 60 : defaultTime; // Convert string to number
+  const quizTime = quiz.quizTime ? parseInt(quiz.quizTime) * 60 : defaultTime;
   const [timeLeft, setTimeLeft] = useState(quizTime);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [randomizedQuestions, setRandomizedQuestions] = useState([]);
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
@@ -25,6 +28,21 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
       dispatch(setLoading(false));
     }
   }, [isSubmitting, dispatch]);
+
+  useEffect(() => {
+    // Shuffle questions
+    const shuffledQuestions = [...quiz.questions].map(question => ({
+      ...question,
+      // Shuffle options and keep track of original indices
+      options: question.options.map((opt, index) => ({
+        text: opt,
+        originalIndex: index // Keep track of original index (0=A, 1=B, etc.)
+      }))
+      .sort(() => Math.random() - 0.5)
+    })).sort(() => Math.random() - 0.5);
+
+    setRandomizedQuestions(shuffledQuestions);
+  }, [quiz]);
 
   useEffect(() => {
     questionRefs.current[currentQuestionIndex]?.scrollIntoView({
@@ -54,12 +72,14 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
 
   const handleQuestionClick = (index) => {
     setCurrentQuestionIndex(index);
-    setVisitedQuestions((prev) => new Set(prev).add(quiz.questions[index].questionid));
+    setVisitedQuestions((prev) => new Set(prev).add(randomizedQuestions[index].questionid));
     questionRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  const handleOptionChange = (questionId, option) => {
-    setSelectedAnswers((prev) => ({ ...prev, [questionId]: option }));
+  const handleOptionChange = (questionId, optionIndex) => {
+    const question = randomizedQuestions.find(q => q.questionid === questionId);
+    const originalOption = ['A', 'B', 'C', 'D'][question.options[optionIndex].originalIndex];
+    setSelectedAnswers((prev) => ({ ...prev, [questionId]: originalOption }));
   };
 
   const handleOptionDoubleClick = (questionId, option) => {
@@ -79,7 +99,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
     if (isSubmitted || windowshow) {
       try {
         const response = await axios.post(
-          'http://localhost:4001/user/submit-quiz',
+          `${Api_URL}/user/submit-quiz`,
           {
             quizid: localStorage.getItem('quizId'),
             teckziteId: localStorage.getItem('Teckziteid'),
@@ -147,7 +167,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
         <div className="w-[350px] p-4 bg-[#0A192F]/90 backdrop-blur-sm border-r-[1px] border-r-cyan-500/20 border-0 h-[calc(100vh-80px)] fixed left-0 top-20 overflow-y-auto">
           <h3 className="text-xl font-bold mb-4 text-cyan-400">Questions</h3>
           <div className="grid grid-cols-4 gap-2">
-            {quiz.questions.map((question, index) => (
+            {randomizedQuestions.map((question, index) => (
               <button
                 key={index}
                 onClick={() => handleQuestionClick(index)}
@@ -173,9 +193,9 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
           <div className="mt-6 bg-[#112240] p-4 rounded-xl border border-cyan-500/30">
             <h4 className="text-lg font-bold text-cyan-400 mb-3">Rules:</h4>
             <ul className="list-disc pl-5 space-y-2 text-gray-300">
-              <li>if the color of the option is green then the option is selected  </li>
-              <li>if the color of the option is yellow then the option is not selected</li>
-              <li>if the color of the option is white then the option is not visited and selected</li>
+              <li>if the color of the option is green then the option is visited and selected</li>
+              <li>if the color of the option is yellow then the option is visited and not selected</li>
+              <li>if the color of the option is blue then the option is not visited and notselected</li>
             </ul>
           </div>
         </div>
@@ -194,7 +214,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
               </div>
             </div>
 
-            {quiz.questions.map((question, index) => (
+            {randomizedQuestions.map((question, index) => (
               <div
                 key={question.questionid}
                 ref={(el) => (questionRefs.current[index] = el)}
@@ -219,41 +239,41 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {["A", "B", "C", "D"].map((optionLetter, i) => (
+                    {question.options.map((option, i) => (
                       <label
                         key={i}
                         className={`relative flex items-center p-4 rounded-xl cursor-pointer
                           transition-all duration-300 ${
-                            selectedAnswers[question.questionid] === optionLetter
+                            selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]
                               ? 'bg-green-500/30 border-2 border-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
                               : 'bg-[#1A2C4E] hover:bg-cyan-500/20 border-2 border-cyan-600/30 hover:border-cyan-400'
                           }`}
-                        onClick={() => handleOptionChange(question.questionid, optionLetter)}
-                        onDoubleClick={() => handleOptionDoubleClick(question.questionid, optionLetter)}
+                        onClick={() => handleOptionChange(question.questionid, i)}
+                        onDoubleClick={() => handleOptionDoubleClick(question.questionid, ['A', 'B', 'C', 'D'][option.originalIndex])}
                       >
                         <input
                           type="radio"
                           name={`question-${question.questionid}`}
-                          value={optionLetter}
-                          checked={selectedAnswers[question.questionid] === optionLetter}
+                          value={['A', 'B', 'C', 'D'][option.originalIndex]}
+                          checked={selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]}
                           onChange={() => {}}
                           className="hidden"
                         />
                         <div className="flex items-center w-full text-base">
                           <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-3 
-                            ${selectedAnswers[question.questionid] === optionLetter 
+                            ${selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]
                               ? 'bg-green-500/40 text-green-300 border-2 border-green-400' 
                               : 'bg-[#112240] text-cyan-300 border-2 border-cyan-500'} 
                             `}
                           >
-                            {optionLetter}
+                            {['A', 'B', 'C', 'D'][option.originalIndex]}
                           </span>
                           <span className={`${
-                            selectedAnswers[question.questionid] === optionLetter 
+                            selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]
                               ? 'text-green-300' 
                               : 'text-cyan-300'
                           }`}>
-                            {question.options[i]}
+                            {option.text}
                           </span>
                         </div>
                       </label>

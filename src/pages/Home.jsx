@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AttemptQuiz from '../components/QuizAttempt';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '../store/authslice';
+import { Api_URL } from '../utils/Api_url';
 
 const Home = () => {
   const [quiz, setQuiz] = useState(null);
@@ -22,7 +23,7 @@ const Home = () => {
       const fetchQuiz = async () => {
         dispatch(setLoading(true));
         try {
-          const response = await axios.get(`http://localhost:4001/user/quiz?quizid=${quizId}`, {
+          const response = await axios.get(`${Api_URL}/user/quiz?quizid=${quizId}`, {
             headers: { Authorization: `Bearer ${loginToken}` },
           });
           setQuiz(response.data);
@@ -51,7 +52,6 @@ const Home = () => {
               <h1 className="text-4xl font-bold text-cyan-400 text-center mb-8">
                 {quiz.quizName}
               </h1>
-              
               <div className="mb-8">
                 <p className="text-lg text-gray-300 text-center mb-6">
                   {quiz.quizDesc}
