@@ -35,14 +35,20 @@ const LoginForm = () => {
         body: JSON.stringify({ teckziteId, quizpassword }),
       });
 
-      if (response.ok) {
+      if (response.status===200) {
         const data = await response.json();
         localStorage.setItem('Teckziteid', teckziteId);
         localStorage.setItem('quizId', data.quizid);
         localStorage.setItem('logintoken', data.logintoken);
         setShowQuiz(true);
-      } else {
+      } else if(response.status === 400) {
         throw new Error('Wrong credentials. Please try again.');
+      }
+      else if(response.status === 404) {
+        throw new Error('you are not allowed to take this quiz because you allready submitted this quiz');
+      }
+      else if(response.status === 402) {
+        throw new Error('quiz not found');
       }
     } catch (error) {
       alert(error.message);

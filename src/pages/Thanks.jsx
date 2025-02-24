@@ -34,13 +34,20 @@ function ThankYou() {
                     </div>
 
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() => {
+                           
+                            window.open('', '_self').close();
+                            
+                            // Fallback for browsers that block window.close()
+                            window.location.href = 'about:blank';
+                            setTimeout(window.close, 100);
+                        }}
                         className="px-8 py-3 rounded-xl text-lg font-bold transition-all duration-300
                             bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
                             text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]
                             hover:scale-105 border-2 border-cyan-400/50"
                     >
-                        Return Home
+                        Exit Browser
                     </button>
                 </div>
             </div>

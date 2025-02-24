@@ -30,16 +30,18 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   }, [isSubmitting, dispatch]);
 
   useEffect(() => {
-    // Shuffle questions
-    const shuffledQuestions = [...quiz.questions].map(question => ({
-      ...question,
-      // Shuffle options and keep track of original indices
-      options: question.options.map((opt, index) => ({
+    // Shuffle questions and options
+    const shuffledQuestions = [...quiz.questions].map(question => {
+      const shuffledOptions = question.options.map((opt, index) => ({
         text: opt,
         originalIndex: index // Keep track of original index (0=A, 1=B, etc.)
-      }))
-      .sort(() => Math.random() - 0.5)
-    })).sort(() => Math.random() - 0.5);
+      })).sort(() => Math.random() - 0.5);
+
+      return {
+        ...question,
+        options: shuffledOptions
+      };
+    }).sort(() => Math.random() - 0.5);
 
     setRandomizedQuestions(shuffledQuestions);
   }, [quiz]);
@@ -77,14 +79,12 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   };
 
   const handleOptionChange = (questionId, optionIndex) => {
-    const question = randomizedQuestions.find(q => q.questionid === questionId);
-    const originalOption = ['A', 'B', 'C', 'D'][question.options[optionIndex].originalIndex];
-    setSelectedAnswers((prev) => ({ ...prev, [questionId]: originalOption }));
+    setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
   };
 
-  const handleOptionDoubleClick = (questionId, option) => {
+  const handleOptionDoubleClick = (questionId, optionIndex) => {
     setSelectedAnswers((prev) => {
-      if (prev[questionId] === option) {
+      if (prev[questionId] === optionIndex) {
         const { [questionId]: _, ...rest } = prev;
         return rest;
       }
@@ -103,10 +103,14 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
           {
             quizid: localStorage.getItem('quizId'),
             teckziteId: localStorage.getItem('Teckziteid'),
-            answers: Object.entries(selectedAnswers).map(([questionId, selectedOption]) => ({
-              questionId,
-              selectedOption: { A: 1, B: 2, C: 3, D: 4 }[selectedOption],
-            })),
+            answers: Object.entries(selectedAnswers).map(([questionId, selectedOption]) => {
+              const question = randomizedQuestions.find(q => q.questionid === questionId);
+              const originalOptionIndex = question.options[selectedOption].originalIndex;
+              return {
+                questionId,
+                selectedOption: originalOptionIndex + 1, // Convert index to 1-based
+              };
+            }),
           },
           {
             headers: {
@@ -126,7 +130,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
     } else {
       setIsSubmitting(false);
     }
-  }, [selectedAnswers, isSubmitting, isSubmitted]);
+  }, [selectedAnswers, isSubmitting, isSubmitted, randomizedQuestions]);
 
   useEffect(() => {
     if (isSubmitted) {
@@ -166,27 +170,53 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
         {/* Sidebar */}
         <div className="w-[350px] p-4 bg-[#0A192F]/90 backdrop-blur-sm border-r-[1px] border-r-cyan-500/20 border-0 h-[calc(100vh-80px)] fixed left-0 top-20 overflow-y-auto">
           <h3 className="text-xl font-bold mb-4 text-cyan-400">Questions</h3>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="relative" style={{ height: `${randomizedQuestions.length * 100}px` }}>
             {randomizedQuestions.map((question, index) => (
-              <button
-                key={index}
-                onClick={() => handleQuestionClick(index)}
-                className={`h-10 w-full flex items-center justify-center rounded-lg transition-all duration-300
-                  ${
-                    currentQuestionIndex === index
+              <React.Fragment key={index}>
+                <button
+                  onClick={() => handleQuestionClick(index)}
+                  className={`h-16 w-16 flex items-center justify-center rounded-full transition-all duration-300 absolute left-1/2 transform -translate-x-1/2
+                    ${currentQuestionIndex === index
                       ? 'bg-cyan-500/40 ring-2 ring-cyan-400 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
                       : ''
-                  }
-                  ${
-                    selectedAnswers[question.questionid]
-                      ? "bg-green-500/40 text-green-300 border-2 border-green-400"
-                      : visitedQuestions.has(question.questionid)
-                      ? "bg-amber-500/40 text-amber-300 border-2 border-amber-400"
-                      : "bg-[#112240] text-gray-300 hover:bg-cyan-500/20 border-2 border-gray-600 hover:border-cyan-400"
-                  }`}
-              >
-                {index + 1}
-              </button>
+                    }
+                    ${
+                      selectedAnswers[question.questionid] !== undefined
+                        ? "bg-green-500/40 text-green-300 border-2 border-green-400"
+                        : visitedQuestions.has(question.questionid)
+                        ? "bg-amber-500/40 text-amber-300 border-2 border-amber-400"
+                        : "bg-[#112240] text-gray-300 hover:bg-cyan-500/20 border-2 border-gray-600 hover:border-cyan-400"
+                    }`}
+                  style={{ top: `${index * 100}px` }}
+                >
+                  {index + 1}
+                </button>
+                {index < randomizedQuestions.length - 1 && (
+                  <svg
+                    className="absolute left-1/2 transform -translate-x-1/2"
+                    style={{ top: `${index * 100 + 50}px` }}
+                    width="2"
+                    height="100"
+                    viewBox="0 0 2 100"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line
+                      x1="1"
+                      y1="0"
+                      x2="1"
+                      y2="100"
+                      stroke={
+                        selectedAnswers[randomizedQuestions[index].questionid] !== undefined &&
+                        selectedAnswers[randomizedQuestions[index + 1].questionid] !== undefined
+                          ? 'green'
+                          : 'gray'
+                      }
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+              </React.Fragment>
             ))}
           </div>
           
@@ -244,32 +274,32 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
                         key={i}
                         className={`relative flex items-center p-4 rounded-xl cursor-pointer
                           transition-all duration-300 ${
-                            selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]
+                            selectedAnswers[question.questionid] === i
                               ? 'bg-green-500/30 border-2 border-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
                               : 'bg-[#1A2C4E] hover:bg-cyan-500/20 border-2 border-cyan-600/30 hover:border-cyan-400'
                           }`}
                         onClick={() => handleOptionChange(question.questionid, i)}
-                        onDoubleClick={() => handleOptionDoubleClick(question.questionid, ['A', 'B', 'C', 'D'][option.originalIndex])}
+                        onDoubleClick={() => handleOptionDoubleClick(question.questionid, i)}
                       >
                         <input
                           type="radio"
                           name={`question-${question.questionid}`}
-                          value={['A', 'B', 'C', 'D'][option.originalIndex]}
-                          checked={selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]}
+                          value={i}
+                          checked={selectedAnswers[question.questionid] === i}
                           onChange={() => {}}
                           className="hidden"
                         />
                         <div className="flex items-center w-full text-base">
                           <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-3 
-                            ${selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]
+                            ${selectedAnswers[question.questionid] === i
                               ? 'bg-green-500/40 text-green-300 border-2 border-green-400' 
                               : 'bg-[#112240] text-cyan-300 border-2 border-cyan-500'} 
                             `}
                           >
-                            {['A', 'B', 'C', 'D'][option.originalIndex]}
+                            {['A', 'B', 'C', 'D'][i]}
                           </span>
                           <span className={`${
-                            selectedAnswers[question.questionid] === ['A', 'B', 'C', 'D'][option.originalIndex]
+                            selectedAnswers[question.questionid] === i
                               ? 'text-green-300' 
                               : 'text-cyan-300'
                           }`}>
