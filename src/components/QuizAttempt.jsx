@@ -54,23 +54,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
     });
   }, [currentQuestionIndex]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          if (!isSubmitted) {
-            setIsSubmitted(true);
-            handleSubmit(false);
-          }
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isSubmitted]);
+ 
 
   const handleQuestionClick = (index) => {
     setCurrentQuestionIndex(index);
@@ -131,6 +115,26 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
       setIsSubmitting(false);
     }
   }, [selectedAnswers, isSubmitting, isSubmitted, randomizedQuestions]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          if (!isSubmitted) {
+            setIsSubmitted(true);
+            setTimeout(() => {
+              handleSubmit(false);
+            }, 0);
+          }
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  
+    return () => clearInterval(timer);
+  }, [isSubmitted, handleSubmit, selectedAnswers]);
 
   useEffect(() => {
     if (isSubmitted) {
