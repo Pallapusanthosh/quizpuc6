@@ -1,4 +1,4 @@
 
 
-export const Api_URL = 'https://techzite-quiz-server.onrender.com'
+export const Api_URL = 'https://quizserver-4s5l.onrender.com'
 
