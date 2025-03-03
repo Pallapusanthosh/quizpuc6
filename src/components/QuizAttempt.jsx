@@ -29,6 +29,10 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
     }
   }, [isSubmitting, dispatch]);
 
+
+
+
+
   useEffect(() => {
     // Shuffle questions and options
     const shuffledQuestions = [...quiz.questions].map(question => {
@@ -172,7 +176,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
 
       <div className="flex pt-20">
         {/* Sidebar */}
-        <div className="w-[350px] p-4 bg-[#0A192F]/90 backdrop-blur-sm border-r-[1px] border-r-cyan-500/20 border-0 h-[calc(100vh-80px)] fixed left-0 top-20 overflow-y-auto">
+        <div className="w-[350px] p-4 bg-[#0A192F]/90 backdrop-blur-sm border-r-[1px] border-r-cyan-500/20 border-0 h-[calc(100vh-80px)] fixed left-0 top-20 overflow-y-auto no-scrollbar">
           <h3 className="text-xl font-bold mb-4 text-cyan-400">Questions</h3>
           <div className="relative" style={{ height: `${randomizedQuestions.length * 100}px` }}>
             {randomizedQuestions.map((question, index) => (
@@ -235,9 +239,9 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
         </div>
 
         {/* Main Content */}
-        <div className="ml-80 p-6 w-[calc(100vw-256px)]">
-          <div className="max-w-5xl mx-auto">
-            <div className="mb-8 text-center bg-[#112240]/50 backdrop-blur-sm p-6 rounded-xl border border-cyan-500/20">
+        <div className="ml-80 p-4 w-[calc(100vw-256px)]">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8 text-center bg-[#112240]/50 backdrop-blur-sm p-4 rounded-xl border border-cyan-500/20">
               <div className="mb-4">
                 <h1 className="text-4xl font-bold text-cyan-400 mb-2">
                   Quiz Name : {quiz.quizName}
@@ -252,10 +256,10 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
               <div
                 key={question.questionid}
                 ref={(el) => (questionRefs.current[index] = el)}
-                className={`mb-6 p-6 bg-[#112240]/50 backdrop-blur-sm rounded-xl border border-cyan-500/20
+                className={`mb-4 p-4 bg-[#112240]/50 backdrop-blur-sm rounded-xl border border-cyan-500/20
                   ${currentQuestionIndex === index ? "ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]" : ""}`}
               >
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <h3 className="text-xl font-semibold text-gray-100">
                     <span className="mr-2 text-cyan-400">Q{index + 1}.</span>
                     {question.questionText}
@@ -263,20 +267,20 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
                   
                   {/* Question Image */}
                   {question.questionimage && (
-                    <div className="my-4 flex justify-center items-center">
+                    <div className="my-2 flex justify-center items-center">
                       <img 
                         src={question.questionimage} 
                         alt="Question Image"
-                        className="w-[400px] h-[400px] object-contain rounded-lg border-2 border-cyan-500/30"
+                        className="w-[300px] h-[300px] object-contain rounded-lg border-2 border-cyan-500/30"
                       />
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {question.options.map((option, i) => (
                       <label
                         key={i}
-                        className={`relative flex items-center p-4 rounded-xl cursor-pointer
+                        className={`relative flex items-center p-3 rounded-xl cursor-pointer
                           transition-all duration-300 ${
                             selectedAnswers[question.questionid] === i
                               ? 'bg-green-500/30 border-2 border-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
@@ -294,7 +298,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
                           className="hidden"
                         />
                         <div className="flex items-center w-full text-base">
-                          <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-3 
+                          <span className={`w-6 h-6 flex items-center justify-center rounded-full mr-2 
                             ${selectedAnswers[question.questionid] === i
                               ? 'bg-green-500/40 text-green-300 border-2 border-green-400' 
                               : 'bg-[#112240] text-cyan-300 border-2 border-cyan-500'} 
