@@ -21,6 +21,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
 
+
   useEffect(() => {
     if (isSubmitting) {
       dispatch(setLoading(true));
@@ -119,6 +120,34 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
       setIsSubmitting(false);
     }
   }, [selectedAnswers, isSubmitting, isSubmitted, randomizedQuestions]);
+  
+
+  useEffect(() => {
+    // Detect tab switch
+    const handleTabSwitch = () => {
+      if (document.hidden) {
+        handleSubmit(); // Automatically submits when the tab is switched
+      }
+    };
+
+    // Disable right-click
+    const disableRightClick = (e) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener("visibilitychange", handleTabSwitch);
+    document.addEventListener("contextmenu", disableRightClick);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleTabSwitch);
+      document.removeEventListener("contextmenu", disableRightClick);
+    };
+  }, [handleSubmit]);
+
+
+     
+
+
 
   useEffect(() => {
     const timer = setInterval(() => {

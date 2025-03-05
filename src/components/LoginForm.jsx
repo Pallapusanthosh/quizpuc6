@@ -22,6 +22,17 @@ const LoginForm = () => {
       navigate('/');
     }
   }, [quizid, navigate, dispatch]);
+     useEffect(() => {
+    
+        // Disable right-click
+        const disableRightClick = (e) => {
+          e.preventDefault();
+        };
+        document.addEventListener("contextmenu", disableRightClick);
+        return () => {
+          document.removeEventListener("contextmenu", disableRightClick);
+        };
+      }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,7 +96,9 @@ const LoginForm = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-cyan-500 text-gray-900 py-2 px-4 rounded-lg hover:bg-cyan-400 transition duration-200 font-semibold"
+            className={`w-full py-2 px-4 rounded-lg transition duration-200 font-semibold ${
+              loading ? 'bg-gray-500 text-gray-300' : 'bg-cyan-500 text-gray-900 hover:bg-cyan-400'
+            }`}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>

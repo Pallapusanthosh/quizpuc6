@@ -37,6 +37,18 @@ const Home = () => {
     }
   }, []);
 
+    useEffect(() => {
+  
+      // Disable right-click
+      const disableRightClick = (e) => {
+        e.preventDefault();
+      };
+      document.addEventListener("contextmenu", disableRightClick);
+      return () => {
+        document.removeEventListener("contextmenu", disableRightClick);
+      };
+    }, []);
+
   if (!quiz) return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A192F] to-black flex justify-center items-center">
       <div className="text-cyan-400 text-2xl font-bold animate-pulse">Loading...</div>
