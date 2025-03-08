@@ -82,6 +82,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   };
 
   const handleSubmit = useCallback(async (show) => {
+ 
     if (isSubmitting || isSubmitted) return;
     setIsSubmitting(true);
     const windowshow = show ? window.confirm('Are you sure you want to submit the quiz?') : true;
@@ -205,14 +206,14 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
 
       <div className="flex pt-20">
         {/* Sidebar */}
-        <div className="w-[350px] p-4 bg-[#0A192F]/90 backdrop-blur-sm border-r-[1px] border-r-cyan-500/20 border-0 h-[calc(100vh-80px)] fixed left-0 top-20 overflow-y-auto no-scrollbar">
+        <div className="w-[270px] p-4 bg-[#0A192F]/90 backdrop-blur-sm border-r-[1px] border-r-cyan-500/20 border-0 h-[calc(100vh-80px)] fixed left-0 top-20 overflow-y-auto no-scrollbar">
           <h3 className="text-xl font-bold mb-4 text-cyan-400">Questions</h3>
           <div className="relative" style={{ height: `${randomizedQuestions.length * 100}px` }}>
             {randomizedQuestions.map((question, index) => (
               <React.Fragment key={index}>
                 <button
                   onClick={() => handleQuestionClick(index)}
-                  className={`h-16 w-16 flex items-center justify-center rounded-full transition-all duration-300 absolute left-1/2 transform -translate-x-1/2
+                  className={`h-8 w-8 flex items-center justify-center rounded-full transition-all duration-300 absolute left-1/2 transform -translate-x-1/2
                     ${currentQuestionIndex === index
                       ? 'bg-cyan-500/40 ring-2 ring-cyan-400 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
                       : ''
@@ -269,7 +270,7 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
 
         {/* Main Content */}
         <div className="ml-80 p-4 w-[calc(100vw-256px)]">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="mb-8 text-center bg-[#112240]/50 backdrop-blur-sm p-4 rounded-xl border border-cyan-500/20">
               <div className="mb-4">
                 <h1 className="text-4xl font-bold text-cyan-400 mb-2">
