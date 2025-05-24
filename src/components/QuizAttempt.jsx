@@ -131,12 +131,27 @@ const AttemptQuiz = ({ quiz, teckziteId, fullscreenContainerRef }) => {
       e.preventDefault();
     };
 
+    // Submit quiz if any key is pressed in fullscreen
+    const submitOnAnyKey = (e) => {
+      const isFullscreen =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+      if (isFullscreen && !hasSubmittedRef.current) {
+        hasSubmittedRef.current = true;
+        handleSubmit(false);
+      }
+    };
+
     document.addEventListener("visibilitychange", handleTabSwitch);
     document.addEventListener("contextmenu", disableRightClick);
+    window.addEventListener("keydown", submitOnAnyKey, true);
 
     return () => {
       document.removeEventListener("visibilitychange", handleTabSwitch);
       document.removeEventListener("contextmenu", disableRightClick);
+      window.removeEventListener("keydown", submitOnAnyKey, true);
     };
   }, [handleSubmit]);
 
