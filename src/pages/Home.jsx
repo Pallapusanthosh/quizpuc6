@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import AttemptQuiz from '../components/QuizAttempt';
@@ -12,6 +12,8 @@ const Home = () => {
   const [teckziteId, setTeckziteId] = useState('');
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
+  const containerRef = useRef(null);
+  const [fullscreenKey, setFullscreenKey] = useState(0); // to force remount AttemptQuiz
 
   useEffect(() => {
     const quizId = localStorage.getItem('quizId');
@@ -49,6 +51,22 @@ const Home = () => {
       };
     }, []);
 
+  const handleStartQuiz = async () => {
+    setAttemptQuiz(true);
+    setFullscreenKey(prev => prev + 1); // force remount for clean event binding
+    setTimeout(() => {
+      if (containerRef.current && containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current && containerRef.current.webkitRequestFullscreen) {
+        containerRef.current.webkitRequestFullscreen();
+      } else if (containerRef.current && containerRef.current.mozRequestFullScreen) {
+        containerRef.current.mozRequestFullScreen();
+      } else if (containerRef.current && containerRef.current.msRequestFullscreen) {
+        containerRef.current.msRequestFullscreen();
+      }
+    }, 0);
+  };
+
   if (!quiz) return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A192F] to-black flex justify-center items-center">
       <div className="text-cyan-400 text-2xl font-bold animate-pulse">Loading...</div>
@@ -57,8 +75,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A192F] to-black">
-      <div className="min-h-screen">
-        {!attemptQuiz ? (
+      <div className="min-h-screen  overflow-auto " ref={containerRef}>
+        {!attemptQuiz ? ( 
           <div className="flex justify-center items-center min-h-screen p-4">
             <div className="bg-[#112240]/50 backdrop-blur-sm p-8 rounded-xl border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.2)] w-full max-w-2xl">
               <h1 className="text-4xl font-bold text-cyan-400 text-center mb-8">
@@ -104,7 +122,7 @@ const Home = () => {
                 </div>
                 
                 <button
-                  onClick={() => setAttemptQuiz(true)}
+                  onClick={handleStartQuiz}
                   className="px-8 py-3 rounded-xl text-lg font-bold transition-all duration-300
                     bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
                     text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]
@@ -127,7 +145,12 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          <AttemptQuiz quiz={quiz} teckziteId={teckziteId} />
+          <AttemptQuiz
+            key={fullscreenKey}
+            quiz={quiz}
+            teckziteId={teckziteId}
+            fullscreenContainerRef={containerRef}
+          />
         )}
       </div>
     </div>

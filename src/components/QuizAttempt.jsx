@@ -5,7 +5,7 @@ import axios from "axios";
 import { setLoading } from "../store/authslice";
 import { Api_URL } from "../utils/Api_url";
 
-const AttemptQuiz = ({ quiz, teckziteId }) => {
+const AttemptQuiz = ({ quiz, teckziteId, fullscreenContainerRef }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [visitedQuestions, setVisitedQuestions] = useState(new Set());
@@ -21,6 +21,8 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
 
+  // Add a ref to prevent multiple submits
+  const hasSubmittedRef = useRef(false);
 
   useEffect(() => {
     if (isSubmitting) {
@@ -29,10 +31,6 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
       dispatch(setLoading(false));
     }
   }, [isSubmitting, dispatch]);
-
-
-
-
 
   useEffect(() => {
     // Shuffle questions and options
@@ -59,8 +57,6 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
     });
   }, [currentQuestionIndex]);
 
- 
-
   const handleQuestionClick = (index) => {
     setCurrentQuestionIndex(index);
     setVisitedQuestions((prev) => new Set(prev).add(randomizedQuestions[index].questionid));
@@ -82,7 +78,6 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   };
 
   const handleSubmit = useCallback(async (show) => {
- 
     if (isSubmitting || isSubmitted) return;
     setIsSubmitting(true);
     const windowshow = show ? window.confirm('Are you sure you want to submit the quiz?') : true;
@@ -146,9 +141,37 @@ const AttemptQuiz = ({ quiz, teckziteId }) => {
   }, [handleSubmit]);
 
 
-     
+  // Listen for fullscreen exit and submit
+  useEffect(() => {
+    function handleFullscreenChange() {
+      const isFullscreen =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+      if (!isFullscreen && !hasSubmittedRef.current) {
+        hasSubmittedRef.current = true;
+        handleSubmit(false);
+      }
+    }
 
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, [handleSubmit]);
+
+  // Reset hasSubmittedRef when component mounts
+  useEffect(() => {
+    hasSubmittedRef.current = false;
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
