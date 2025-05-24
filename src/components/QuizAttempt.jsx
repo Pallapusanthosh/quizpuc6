@@ -131,14 +131,29 @@ const AttemptQuiz = ({ quiz, teckziteId, fullscreenContainerRef }) => {
       e.preventDefault();
     };
 
-    // Submit quiz if any key is pressed in fullscreen
+    // Submit quiz if any key is pressed in fullscreen or if prtscr/fn is pressed
     const submitOnAnyKey = (e) => {
       const isFullscreen =
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.mozFullScreenElement ||
         document.msFullscreenElement;
-      if (isFullscreen && !hasSubmittedRef.current) {
+
+      // Check for PrintScreen (PrtSc, PrintScrn, etc.) or Fn key
+      // PrintScreen: e.key === "PrintScreen" or e.keyCode === 44
+      // Fn key: e.key === "Fn" (not always detectable, but included for completeness)
+      const isPrintScreen =
+        e.key === "PrintScreen" ||
+        e.code === "PrintScreen" ||
+        e.keyCode === 44;
+      const isFnKey = e.key === "Fn" || e.code === "Fn";
+
+      // Submit if in fullscreen or PrintScreen/Fn key is pressed
+      if (
+        ((isFullscreen && !hasSubmittedRef.current) ||
+        (isPrintScreen && !hasSubmittedRef.current) ||
+        (isFnKey && !hasSubmittedRef.current))
+      ) {
         hasSubmittedRef.current = true;
         handleSubmit(false);
       }
@@ -154,7 +169,6 @@ const AttemptQuiz = ({ quiz, teckziteId, fullscreenContainerRef }) => {
       window.removeEventListener("keydown", submitOnAnyKey, true);
     };
   }, [handleSubmit]);
-
 
   // Listen for fullscreen exit and submit
   useEffect(() => {
@@ -398,6 +412,7 @@ const AttemptQuiz = ({ quiz, teckziteId, fullscreenContainerRef }) => {
                 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
                 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]
                 hover:scale-105 border-2 border-cyan-400/50"
+              disabled={loading || isSubmitting || isSubmitted}
             >
               {loading ? (
                 <span className="flex items-center">
